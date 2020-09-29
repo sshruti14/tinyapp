@@ -65,7 +65,18 @@ app.post("/urls", (req, res) => {
   let randString = generateRandomString();
   urlDatabase[randString] =req.body.longURL
   console.log(urlDatabase);
-  res.redirect('/urls'); 
+  
+  res.redirect(`/urls/${randString}`); 
+});
+
+//To redirect from short url to Long
+app.get("/u/:shortURL", (req, res) => {
+  // const longURL = ...
+  //let longURL = urlDatabase[shortURL];
+  console.log(urlDatabase[req.params.shortURL]);
+  const longURL = urlDatabase[req.params.shortURL];
+  console.log(longURL);
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
