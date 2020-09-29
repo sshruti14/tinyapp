@@ -73,18 +73,25 @@ app.post("/urls", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   // const longURL = ...
   //let longURL = urlDatabase[shortURL];
-  console.log(urlDatabase[req.params.shortURL]);
   const longURL = urlDatabase[req.params.shortURL];
-  console.log(longURL);
   res.redirect(longURL);
 });
 
-//To deleete a URL
+//To delete a URL
 app.post('/urls/:shortURL/delete',(req,res)=>{
-
-  console.log(req.params.shortURL);
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
+})
+
+//Post a updated URL
+app.post('/urls/:shortURL',(req,res)=>{
+
+  const shortUrl = req.params.shortURL;
+  // const userURL = ;
+  console.log(req.body.newLongURL);
+  urlDatabase[shortUrl] = req.body.newLongURL;
+  res.redirect('/urls');
+
 })
 
 app.listen(PORT, () => {
