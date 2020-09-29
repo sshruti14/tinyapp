@@ -1,4 +1,6 @@
 const express = require("express");
+const cookieParser =require("cookie-parser");
+
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -11,6 +13,7 @@ const urlDatabase = {
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 //To generate a unique Id while adding an entry to DB
 function generateRandomString() {
@@ -41,19 +44,24 @@ app.get("/hello", (req, res) => {
 //To display the list of urls
 app.get("/urls", (req, res) => {
   const templateVars = {
-    urls: urlDatabase,
+    username: req.cookies["username"],
+    urls: urlDatabase
   };
   res.render("urls_index", templateVars);
 });
 
 //To render urls_new.ejs.ie to display the page to add a new url to tiny app
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new",templateVars);
 });
 
 //To filter for each url
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
+    username: req.cookies["username"],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
@@ -92,6 +100,25 @@ app.post('/urls/:shortURL',(req,res)=>{
   urlDatabase[shortUrl] = req.body.newLongURL;
   res.redirect('/urls');
 
+})
+
+//To display the login form
+app.get('/login',(req,res)=>{
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+res.render('login',templateVars);
+})
+
+app.post('/logout',(req,res) =>{
+  res.clearCookie('username');
+  res.redirect('/urls');
+})
+
+//to submit the login request
+app.post('/login',(req,res) =>{
+res.cookie('username',req.body.username) ;
+res.redirect('/urls');
 })
 
 app.listen(PORT, () => {
