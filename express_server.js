@@ -121,6 +121,14 @@ res.cookie('username',req.body.username) ;
 res.redirect('/urls');
 })
 
+//To view the registration form
+app.get('/register',(req,res) =>{
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("register",templateVars);
+})
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
