@@ -1,5 +1,7 @@
 const express = require("express");
-const cookieParser =require("cookie-parser");
+const cookieParser = require("cookie-parser");
+const util = require("util");
+const { getUserByEmail } = require("./helpers.js");
 
 const app = express();
 const PORT = 8080; // default port 8080
@@ -7,8 +9,21 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com",
+};
+
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user1@example.com",
+    password: "user1",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "user2",
+  },
 };
 
 const bodyParser = require("body-parser");
@@ -43,25 +58,37 @@ app.get("/hello", (req, res) => {
 
 //To display the list of urls
 app.get("/urls", (req, res) => {
+  let userId = req.cookies["user_id"];
+  console.log("User Id in fetch /urls" + userId);
+  let user = users[userId];
+
+  console.log(`User Obj value ${util.inspect(user)}`);
+
   const templateVars = {
-    username: req.cookies["username"],
-    urls: urlDatabase
+    user: user,
+    urls: urlDatabase,
   };
   res.render("urls_index", templateVars);
 });
 
 //To render urls_new.ejs.ie to display the page to add a new url to tiny app
 app.get("/urls/new", (req, res) => {
+  let userId = req.cookies["user_id"];
+  let user = users[userId];
+
   const templateVars = {
-    username: req.cookies["username"],
+    user: user,
   };
-  res.render("urls_new",templateVars);
+  res.render("urls_new", templateVars);
 });
 
 //To filter for each url
 app.get("/urls/:shortURL", (req, res) => {
+  let userId = req.cookies["user_id"];
+  let user = users[userId];
+
   const templateVars = {
-    username: req.cookies["username"],
+    user: user,
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
@@ -71,10 +98,10 @@ app.get("/urls/:shortURL", (req, res) => {
 //To submit a form on creating a new URL
 app.post("/urls", (req, res) => {
   let randString = generateRandomString();
-  urlDatabase[randString] =req.body.longURL
+  urlDatabase[randString] = req.body.longURL;
   console.log(urlDatabase);
-  
-  res.redirect(`/urls/${randString}`); 
+
+  res.redirect(`/urls/${randString}`);
 });
 
 //To redirect from short url to Long
@@ -86,48 +113,68 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 //To delete a URL
-app.post('/urls/:shortURL/delete',(req,res)=>{
+app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
-})
+});
 
 //Post a updated URL
-app.post('/urls/:shortURL',(req,res)=>{
-
+app.post("/urls/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
   // const userURL = ;
   console.log(req.body.newLongURL);
   urlDatabase[shortUrl] = req.body.newLongURL;
-  res.redirect('/urls');
-
-})
+  res.redirect("/urls");
+});
 
 //To display the login form
-app.get('/login',(req,res)=>{
-  const templateVars = {
-    username: req.cookies["username"],
-  };
-res.render('login',templateVars);
-})
+app.get("/login", (req, res) => {
+  let userId = req.cookies["user_id"];
+  let user = users[userId];
 
-app.post('/logout',(req,res) =>{
-  res.clearCookie('username');
-  res.redirect('/urls');
-})
+  const templateVars = {
+    user: user,
+  };
+  res.render("login", templateVars);
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+});
 
 //to submit the login request
-app.post('/login',(req,res) =>{
-res.cookie('username',req.body.username) ;
-res.redirect('/urls');
-})
+app.post("/login", (req, res) => {
+  const user_id = getUserByEmail(users, req.body.email);
+
+  res.cookie("user_id", user_id);
+  res.redirect("/urls");
+});
 
 //To view the registration form
-app.get('/register',(req,res) =>{
+app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: undefined,
   };
-  res.render("register",templateVars);
-})
+  res.render("register", templateVars);
+});
+
+//To register a new user
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const pass = req.body.password;
+  const id = generateRandomString();
+
+  users[id] = {
+    id: id,
+    email: email,
+    password: pass,
+  };
+
+  res.cookie("user_id", id);
+  console.log("User Obj valu" + util.inspect(users));
+  res.redirect("/urls");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
