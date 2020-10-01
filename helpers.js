@@ -8,6 +8,8 @@ const getUserByEmail = (users, email) => {
 
 const checkExistingUser = function (users, email) {
   for (let user in users) {
+    console.log(users[user].email);
+    console.log(email);
     if (users[user].email === email) {
       return true;
     } else {
@@ -16,4 +18,17 @@ const checkExistingUser = function (users, email) {
   }
 };
 
-module.exports = { getUserByEmail, checkExistingUser };
+//checks to see if password matches userid
+const passwordMatch = (users, password) => {
+  for (let user in users) {
+    console.log(users[user].password);
+    console.log(password);
+    if (users[user].password === password) {
+      return true;
+    } else {
+      false;
+    }
+  }
+}
+
+module.exports = { getUserByEmail, checkExistingUser,passwordMatch };

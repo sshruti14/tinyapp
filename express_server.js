@@ -1,7 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const util = require("util");
-const { getUserByEmail,checkExistingUser } = require("./helpers.js");
+const { getUserByEmail,checkExistingUser,passwordMatch } = require("./helpers.js");
 
 const app = express();
 const PORT = 8080; // default port 8080
@@ -146,9 +146,19 @@ app.post("/logout", (req, res) => {
 //to submit the login request
 app.post("/login", (req, res) => {
   const user_id = getUserByEmail(users, req.body.email);
-
-  res.cookie("user_id", user_id);
-  res.redirect("/urls");
+  if(!checkExistingUser(users,req.body.email)){
+    console.log('Existing users dont match');
+    res.status(403).send("Invalid credentials");
+    return;
+  }else if(!passwordMatch(users,req.body.password)){
+    console.log('Passwords dont match');
+    res.status(403).send("User Password is wrong");
+  }else{
+    console.log('Inside else');
+    res.cookie("user_id", user_id);
+    res.redirect("/urls");
+  }
+  
 });
 
 //To view the registration form
