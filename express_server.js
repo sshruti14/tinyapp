@@ -1,7 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const util = require("util");
-const { getUserByEmail } = require("./helpers.js");
+const { getUserByEmail,checkExistingUser } = require("./helpers.js");
 
 const app = express();
 const PORT = 8080; // default port 8080
@@ -165,15 +165,19 @@ app.post("/register", (req, res) => {
   const pass = req.body.password;
   const id = generateRandomString();
 
-  users[id] = {
-    id: id,
-    email: email,
-    password: pass,
-  };
-
-  res.cookie("user_id", id);
-  console.log("User Obj valu" + util.inspect(users));
-  res.redirect("/urls");
+  if (!email || !pass) {
+    res.status(400).send("Please enter email or password to register");
+  } else if (checkExistingUser(users, req.body.email)) {
+    res.status(400).send("User already exists.");
+  } else {
+    users[id] = {
+      id: id,
+      email: email,
+      password: pass,
+    };
+    res.cookie("user_id", id);
+    res.redirect("/urls");
+  }
 });
 
 app.listen(PORT, () => {
