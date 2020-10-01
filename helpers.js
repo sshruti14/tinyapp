@@ -19,14 +19,17 @@ const checkExistingUser = function (users, email) {
 };
 
 //checks to see if password matches userid
-const passwordMatch = (users, password) => {
-  for (let user in users) {
-    if (users[user].password === password) {
-      return true;
-    } else {
-      false;
-    }
-  }
+const passwordMatch = (bcrypt,user_id,users, password) => {
+  // for (let user in users) {
+  //   if (users[user].password === password) {
+  //     return true;
+  //   } else {
+  //     false;
+  //   }
+  // }
+  console.log(password);
+  console.log(users[user_id].password);
+  return bcrypt.compareSync(password, users[user_id].password);
 }
 
 //Function to filter the urls userwise

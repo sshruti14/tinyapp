@@ -1,6 +1,9 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const util = require("util");
+const bcrypt = require('bcryptjs');
+
+
 const {
   getUserByEmail,
   checkExistingUser,
@@ -29,12 +32,12 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user1@example.com",
-    password: "user1",
+    password: bcrypt.hashSync("user1", 10),
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "user2",
+    password:bcrypt.hashSync("user2", 10),
   },
 };
 
@@ -185,7 +188,7 @@ app.post("/login", (req, res) => {
   if (!checkExistingUser(users, req.body.email)) {
     res.status(403).send("Invalid credentials");
     return;
-  } else if (!passwordMatch(users, req.body.password)) {
+  } else if (!passwordMatch(bcrypt,user_id,users, req.body.password)) {
     res.status(403).send("User Password is wrong");
   } else {
     res.cookie("user_id", user_id);
