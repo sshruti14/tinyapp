@@ -2,7 +2,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const util = require("util");
 const bcrypt = require('bcryptjs');
-
+const cookieSession = require('cookie-session')
 
 const {
   getUserByEmail,
@@ -43,7 +43,13 @@ const users = {
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+//app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['shruti'],
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 //To generate a unique Id while adding an entry to DB
 function generateRandomString() {
@@ -73,7 +79,7 @@ app.get("/hello", (req, res) => {
 
 //To display the list of urls
 app.get("/urls", (req, res) => {
-  let userId = req.cookies["user_id"];
+  let userId = req.session.user_id;
   let user = users[userId];
 
   const templateVars = {
@@ -90,7 +96,7 @@ app.get("/urls", (req, res) => {
 
 //To render urls_new.ejs.ie to display the page to add a new url to tiny app
 app.get("/urls/new", (req, res) => {
-  let userId = req.cookies["user_id"];
+  let userId = req.session.user_id;
   let user = users[userId];
 
   const templateVars = {
@@ -106,10 +112,10 @@ app.get("/urls/new", (req, res) => {
 
 //To filter for each url
 app.get("/urls/:shortURL", (req, res) => {
-  let userId = req.cookies["user_id"];
+  let userId = req.session.user_id;
   let user = users[userId];
 
-  console.log("Cookie Value inside edit" + req.cookies["user_id"]);
+  //console.log("Cookie Value inside edit" + req.session.user_id);
   if (!userId) {
     res.status(403).send("You are not logged in!");
     return;
@@ -146,11 +152,11 @@ app.get("/u/:shortURL", (req, res) => {
 
 //To delete a URL
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (!req.cookies["user_id"]) {
+  if (!req.session.user_id) {
     res.status(403).send("You are not logged in!");
     return;
   }
-  if (urlDatabase[req.params.shortURL].userID !== req.cookies["user_id"]) {
+  if (urlDatabase[req.params.shortURL].userID !== req.session.user_id) {
     res.status(403).send("This URL does not belong to you");
     return;
   } else {
@@ -168,7 +174,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //To display the login form
 app.get("/login", (req, res) => {
-  let userId = req.cookies["user_id"];
+  let userId = req.session.user_id;
   let user = users[userId];
 
   const templateVars = {
@@ -178,7 +184,8 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  //res.clearCookie("user_id");
+  req.session.user_id=null;
   res.redirect("/urls");
 });
 
@@ -191,7 +198,7 @@ app.post("/login", (req, res) => {
   } else if (!passwordMatch(bcrypt,user_id,users, req.body.password)) {
     res.status(403).send("User Password is wrong");
   } else {
-    res.cookie("user_id", user_id);
+    req.session.user_id= user_id;
     res.redirect("/urls");
   }
 });
@@ -220,7 +227,7 @@ app.post("/register", (req, res) => {
       email: email,
       password: pass,
     };
-    res.cookie("user_id", id);
+    req.session.user_id = id;
     res.redirect("/urls");
   }
 });

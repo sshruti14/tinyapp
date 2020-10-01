@@ -2,6 +2,7 @@
 const getUserByEmail = (users, email) => {
   for (let user in users) {
     if (users[user].email === email) {
+      console.log('User Id Value'+users[user].id);
       return users[user].id;
     }
   }
@@ -20,13 +21,7 @@ const checkExistingUser = function (users, email) {
 
 //checks to see if password matches userid
 const passwordMatch = (bcrypt,user_id,users, password) => {
-  // for (let user in users) {
-  //   if (users[user].password === password) {
-  //     return true;
-  //   } else {
-  //     false;
-  //   }
-  // }
+
   console.log(password);
   console.log(users[user_id].password);
   return bcrypt.compareSync(password, users[user_id].password);
