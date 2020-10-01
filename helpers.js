@@ -21,9 +21,6 @@ const checkExistingUser = function (users, email) {
 
 //checks to see if password matches userid
 const passwordMatch = (bcrypt,user_id,users, password) => {
-
-  console.log(password);
-  console.log(users[user_id].password);
   return bcrypt.compareSync(password, users[user_id].password);
 }
 
@@ -42,4 +39,18 @@ const urlsForUser =  function (urlDatabase,id) {
   return filteredObj;
 }
 
-module.exports = { getUserByEmail, checkExistingUser,passwordMatch,urlsForUser };
+//To generate a unique Id while adding an entry to DB
+const generateRandomString = function () {
+  let array = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let randString = "";
+
+  randString += array[Math.floor(Math.random() * array.length)];
+  array += "0123456789";
+
+  while (randString.length < 7) {
+    randString += array[Math.floor(Math.random() * array.length)];
+  }
+  return randString;
+}
+
+module.exports = { getUserByEmail, checkExistingUser,passwordMatch,urlsForUser,generateRandomString };

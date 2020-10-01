@@ -2,7 +2,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const util = require("util");
 const bcrypt = require('bcryptjs');
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
+const {generateRandomString} = require('./helpers');
 
 const {
   getUserByEmail,
@@ -50,19 +51,7 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-//To generate a unique Id while adding an entry to DB
-function generateRandomString() {
-  let array = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let randString = "";
 
-  randString += array[Math.floor(Math.random() * array.length)];
-  array += "0123456789";
-
-  while (randString.length < 7) {
-    randString += array[Math.floor(Math.random() * array.length)];
-  }
-  return randString;
-}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
