@@ -46,15 +46,13 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
-  keys: ['shruti'],
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  keys: ['shruti']
 }));
 
 
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect('/urls');
 });
 
 app.get("/urls.json", (req, res) => {
@@ -124,12 +122,12 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //To submit a form on creating a new URL
 app.post("/urls", (req, res) => {
-  let randString = generateRandomString();
-  urlDatabase[randString] = {
+  let newUrlString  = generateRandomString();
+  urlDatabase[newUrlString ] = {
     longURL: req.body.longURL,
     userID: req.session.user_id,
   };
-  res.redirect(`/urls/${randString}`);
+  res.redirect(`/urls/${newUrlString }`);
 });
 
 //To redirect from short url to Long
@@ -173,7 +171,7 @@ app.get("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   //res.clearCookie("user_id");
-  req.session.user_id=null;
+  req.session=null;
   res.redirect("/urls");
 });
 
@@ -183,7 +181,7 @@ app.post("/login", (req, res) => {
   if (!checkExistingUser(users, req.body.email)) {
     res.status(403).send("Invalid credentials");
     return;
-  } else if (!passwordMatch(bcrypt,user_id,users, req.body.password)) {
+  } else if (!passwordMatch(bcrypt,user_id,users,req.body.password)) {
     res.status(403).send("User Password is wrong");
   } else {
     req.session.user_id= user_id;
@@ -203,6 +201,8 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const pass = req.body.password;
+  const hashedPassword = bcrypt.hashSync(pass, 10);
+
   const id = generateRandomString();
 
   if (!email || !pass) {
@@ -213,7 +213,7 @@ app.post("/register", (req, res) => {
     users[id] = {
       id: id,
       email: email,
-      password: pass,
+      password: hashedPassword,
     };
     req.session.user_id = id;
     res.redirect("/urls");

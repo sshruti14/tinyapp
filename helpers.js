@@ -27,13 +27,9 @@ const passwordMatch = (bcrypt,user_id,users, password) => {
 //Function to filter the urls userwise
 const urlsForUser =  function (urlDatabase,id) {
   let filteredObj = {};
-  for (let urlKey in urlDatabase) {
-    if (id === urlDatabase[urlKey].userID) {
-      filteredObj[urlKey] = {
-        shortURL: urlKey,
-        longURL: urlDatabase[urlKey].longURL,
-        userID: urlDatabase[urlKey].userID,
-      }
+  for (let item in urlDatabase) {
+    if (urlDatabase[item].userID === id) {
+      filteredObj[item] = urlDatabase[item];
     }
   }
   return filteredObj;
